@@ -8,7 +8,7 @@ from pymongo import MongoClient
 app = Flask(__name__)
 
 # Configuration
-app.config['MONGO_URI'] = 'mongodb://mongo:27017/user_db'
+app.config['MONGO_URI'] = 'mongodb://localhost:27017/corider'
 
 # Initialize PyMongo
 mongo = PyMongo(app)
@@ -64,7 +64,7 @@ def str_to_objectid(id_str):
 def get_users():
     """
     Get all users from the database.
-    This endpoint returns a list of all user documents from the 'users' collection.
+    This endpoint returns a list of all users.
     """
     users = list(mongo.db.users.find())
     for user in users:
@@ -90,7 +90,7 @@ def get_user(id):
 def create_user():
     """
     Create a new user in the database.
-    This endpoint creates a new user document in the 'users' collection.
+    This endpoint creates a new user .
     The password is hashed before storing for security.
     """
     data = request.json
@@ -104,15 +104,23 @@ def update_user(id):
     """
     Update an existing user by ID.
     This endpoint updates the user document with the specified ID in the 'users' collection.
+    Only the fields provided in the request body will be updated.
     """
     obj_id = str_to_objectid(id)
     if not obj_id:
         return jsonify({"error": "Invalid ID format"}), 400
+    
     data = request.json
+    
     # If the password is updated, hash it before storing
     if 'password' in data:
         data['password'] = generate_password_hash(data['password'])
-    result = mongo.db.users.replace_one({"_id": obj_id}, data)
+    
+    # Prepare the update operation with the $set operator
+    update_data = {"$set": data}
+    
+    result = mongo.db.users.update_one({"_id": obj_id}, update_data)
+    
     if result.matched_count:
         return jsonify({"message": "User updated"}), 200
     return jsonify({"error": "User not found"}), 404
@@ -121,7 +129,7 @@ def update_user(id):
 def delete_user(id):
     """
     Delete a user by ID.
-    This endpoint deletes the user document with the specified ID from the 'users' collection.
+    This endpoint deletes the users document.
     """
     obj_id = str_to_objectid(id)
     if not obj_id:
@@ -132,6 +140,6 @@ def delete_user(id):
     return jsonify({"error": "User not found"}), 404
 
 if __name__ == '__main__':
-    # Ensure the MongoDB schema is enforced before starting the server
+    # Ensure the MongoDB schema created before starting the server
     create_user_schema()
     app.run(host='0.0.0.0', port=5000, debug=True)
