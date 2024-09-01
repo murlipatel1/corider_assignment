@@ -51,4 +51,19 @@ pip install -r requirements.txt
 python app.py
 ```
 
+### Running with Dockerfile
 
+### 1. Pulling the Docker Image from Docker Hub
+### If you prefer to pull the image directly from Docker Hub instead of building it locally, you can do so using:
+
+```bash
+docker pull murlipatel1/flask-mongodb-user-management:latest
+```
+
+### 2. Then, run the container:
+
+```bash
+docker run -d -p 5000:5000 --name flask-mongodb-app murlipatel1/flask-mongodb-user-management:latest
+```
+### Accessing the Application
+### 3. Once the container is running, the application will be accessible at http://localhost:5000.
